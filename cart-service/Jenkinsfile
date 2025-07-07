@@ -22,12 +22,15 @@ pipeline {
 
         stage('Docker Login & Push') {
             steps {
-                withCredentials([string(credentialsId: 'docker-hub-credentials', variable: 'PASSWORD')]) {
-                    bat "echo %PASSWORD% | docker login -u shreyjain23 --password-stdin"
-                    bat "docker push %IMAGE_NAME%"
-                }
+               withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+    bat "echo %PASSWORD% | docker login -u %USERNAME% --password-stdin"
+    bat "docker push %IMAGE_NAME%"
+}
             }
         }
+
+
+
 
         stage('Clean Up') {
             steps {
