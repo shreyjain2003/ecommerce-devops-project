@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "shreyjain23/payment-service:latest"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/shreyjain2003/ecommerce-devops-project.git', branch: 'master'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir('payment-service') {
+                    bat "docker build -t %IMAGE_NAME% ."
+                }
+            }
+        }
+
+        stage('Docker Login & Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    bat "echo %PASSWORD% | docker login -u %USERNAME% --password-stdin"
+                    bat "docker push %IMAGE_NAME%"
+                }
+            }
+        }
+
+        stage('Clean Up') {
+            steps {
+                bat "docker rmi %IMAGE_NAME% || exit 0"
+            }
+        }
+    }
+}
